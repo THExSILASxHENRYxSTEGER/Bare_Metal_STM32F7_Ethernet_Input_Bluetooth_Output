@@ -7,14 +7,14 @@ extern "C"
 
   /* Linker symbols */
   
-  extern uint32_t _estack;
+  extern uint32_t _estack;   // End of stack address
   
-  extern uint32_t _sidata;
-  extern uint32_t _sdata;
-  extern uint32_t _edata;
+  extern uint32_t _sidata;   // Start of initialized data in Flash memory
+  extern uint32_t _sdata;    // Start of initialized data in RAM
+  extern uint32_t _edata;    // End of initialized data in RAM
   
-  extern uint32_t _sbss;
-  extern uint32_t _ebss;
+  extern uint32_t _sbss;     // Start of uninitialized data in RAM
+  extern uint32_t _ebss;     // End of uninitialized data in RAM
   
   
   /* libc constructor function */
@@ -259,9 +259,12 @@ extern "C"
   
   
   /**
-   * @brief Reset Handler to get main ready.
+   * @brief Reset interrupt handler to get to main.
    * 
-   * First take all data, i.e. 
+   * First write all initialized variables from flash memory to RAM.
+   * Then, zero initialize all uninitialized variables.
+   * Call __libc_init_array to construct all global objects.
+   * Finally, enter main.
    */
   
   void Reset_Handler(void)
@@ -280,6 +283,9 @@ extern "C"
     while (dst < &_ebss)
         *dst++ = 0;
 
+    /* Call all global C++ constructors */
+    __libc_init_array();
+
     /* Enter main */
     main();
 
@@ -288,11 +294,12 @@ extern "C"
   }
 
 
-  /**
-   * @brief 
-   * 
-   * @return * void 
-   */
+/**
+ * @brief Default interrupt handler.
+ *
+ * This handler is executed when an unimplemented interrupt occurs.
+ * It enters an infinite loop to halt program execution.
+ */
   void Default_Handler(void)
   {
     while (1);

@@ -1,44 +1,45 @@
-/* program entry point */
+/* Program entry point */
 ENTRY(Reset_Handler)
 
-/* memory regions */
+/* Memory regions */
 MEMORY
 {
     FLASH(rx):ORIGIN =0x08000000, LENGTH =1024K
     RAM(rwx):ORIGIN =0x20010000, LENGTH =256K
 }
 
-/* define the end of the stack memory used in startup.cpp */
+/* Define the end of the stack memory used in startup.cpp */
 _estack = ORIGIN(RAM) + LENGTH(RAM);
 
 SECTIONS
 {
 
-/* set vector table in flash memory*/
+/* Set vector table in flash memory */
 .isr_vector :
 {
     KEEP(*(.isr_vector))
 } > FLASH
 
 
-/* program code */
+/* Save the program code on the flash memory */
 .text :
 {
+    /* Save Program Text in flash memory */
     *(.text*)
+
+    /* Save read only data (const vars) in flash memory */
     *(.rodata*)
+
+    /* Enable interworking between ARM and Thumb instruction sets */
     *(.glue_7*)
     *(.glue_7t*)
-
-    KEEP(*(.init))
-    KEEP(*(.fini))
 
     /* define the end of the text memory section  */
     _etext = .;
 
 } > FLASH
 
-
-/* constructors */
+/* .preinit_array contains functions that must run before .init_array */
 .preinit_array :
 {
     __preinit_array_start = .;
@@ -46,7 +47,7 @@ SECTIONS
     __preinit_array_end = .;
 } > FLASH
 
-
+/* Generate entries for the global/static ctors */
 .init_array :
 {
     __init_array_start = .;
@@ -54,7 +55,7 @@ SECTIONS
     __init_array_end = .;
 } > FLASH
 
-
+/* Generate entries for the global/static dtors */
 .fini_array :
 {
     __fini_array_start = .;
@@ -62,19 +63,8 @@ SECTIONS
     __fini_array_end = .;
 } > FLASH
 
-
-/* ARM unwind tables */
-.ARM.exidx :
-{
-    __exidx_start = .;
-    *(.ARM.exidx*)
-    __exidx_end = .;
-} > FLASH
-
-
-/* initialized data */
+/* Define memory regions for initialized dynamic variables */
 _sidata = LOADADDR(.data);
-
 .data :
 {
     _sdata = .;
@@ -83,7 +73,7 @@ _sidata = LOADADDR(.data);
 } > RAM AT > FLASH
 
 
-/* zero initialized */
+/* Define memory regions for zero initialized dynamic variables */
 .bss :
 {
     _sbss = .;
@@ -93,7 +83,7 @@ _sidata = LOADADDR(.data);
 } > RAM
 
 
-/* heap */
+/* Define the heap */
 .heap :
 {
     __heap_start = .;
@@ -102,7 +92,7 @@ _sidata = LOADADDR(.data);
 } > RAM
 
 
-/* stack */
+/* Define the stack */
 .stack :
 {
     __stack_start = .;

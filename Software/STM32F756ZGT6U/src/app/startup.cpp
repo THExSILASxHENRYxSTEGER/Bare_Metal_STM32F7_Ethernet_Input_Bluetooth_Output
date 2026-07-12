@@ -1,25 +1,21 @@
 #include <stdint.h>
 
-
 /* Ensure C linkage for vector table and handlers */
 extern "C"
 {
 
   /* Linker symbols */
+  extern uint32_t _estack;    // End of stack address
   
-  extern uint32_t _estack;   // End of stack address
+  extern uint32_t _sidata;    // Start of initialized data in Flash memory
+  extern uint32_t _sdata;     // Start of initialized data in RAM
+  extern uint32_t _edata;     // End of initialized data in RAM
   
-  extern uint32_t _sidata;   // Start of initialized data in Flash memory
-  extern uint32_t _sdata;    // Start of initialized data in RAM
-  extern uint32_t _edata;    // End of initialized data in RAM
-  
-  extern uint32_t _sbss;     // Start of uninitialized data in RAM
-  extern uint32_t _ebss;     // End of uninitialized data in RAM
-  
+  extern uint32_t _sbss;      // Start of uninitialized data in RAM
+  extern uint32_t _ebss;      // End of uninitialized data in RAM
   
   /* libc constructor function */
   extern void __libc_init_array(void);
-  
 
   /**
    * @brief Forward declarations of system relevant functions.
@@ -257,7 +253,6 @@ extern "C"
     (uint32_t)&FMPI2C1_ERROR_Handler,
   };
   
-  
   /**
    * @brief Reset interrupt handler to get to main.
    * 
@@ -266,7 +261,6 @@ extern "C"
    * Call __libc_init_array to construct all global objects.
    * Finally, enter main.
    */
-  
   void Reset_Handler(void)
   {
     uint32_t *src;
@@ -292,7 +286,6 @@ extern "C"
     /* Infinite loop if main returns */
     while (1);
   }
-
 
 /**
  * @brief Default interrupt handler.
